@@ -13,10 +13,7 @@ export default function Home() {
           height={38}
           priority
         />
-       
         <FileUpload/>
-
-        
       </main>
       
     </div>
