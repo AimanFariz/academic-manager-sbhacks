@@ -92,14 +92,6 @@ export default function FileUpload() {
                     </div>
                 )}
 
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    disabled={files.length === 0}
-                >
-                    Upload Files
-                </button>
-
                 {status && (
                     <div className="mt-4 p-3 bg-gray-100 rounded">
                         {status}
