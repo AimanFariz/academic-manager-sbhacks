@@ -98,7 +98,7 @@ export default function FileUpload() {
       {photos.length > 0 && (
         <div className="mt-8">
           <h2 className="text-xl font-bold mb-4">Uploaded Photos</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-2">
             {photos.map((photo) => (
               <div key={photo._id} className="border rounded p-2">
                 <img 
