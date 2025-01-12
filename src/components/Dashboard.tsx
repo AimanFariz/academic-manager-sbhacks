@@ -15,7 +15,6 @@ let percent = 100;
             <p className='text-3xl'>Dashboard</p>
             <FileUpload/>
             <FetchPhotosButton/>
-            <Calendar/>
             <div>
                 <p className='text-3xl'>Upcoming Deadlines</p>
             </div>
