@@ -3,6 +3,8 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 
+import Link from 'next/link';
+
 interface Photo {
   _id: string;
   name: string;

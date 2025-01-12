@@ -1,10 +1,16 @@
 'use client'
+import Link from 'next/link'; // Import Link from next/link
 import DemoApp from "@/components/Calendar";
 import CalendarComponent from "@/components/EventCalendar";
 import FetchPhotosButton from "@/components/FetchPhotosButton";
 import FileUpload from "@/components/FileUpload";
+import FetchCalendarButton from "@/components/FetchCalendarButton";
 import Image from "next/image";
 import PhotoAnalysis from '@/components/PhotoAnalysis';
+import {useRouter} from 'next/navigation';
+
+
+
 
 export default function Home() {
   return (
@@ -20,6 +26,8 @@ export default function Home() {
         />
         <FileUpload/>
         <PhotoAnalysis />
+        <FetchCalendarButton/>
+        
       </main>
       
     </div>
