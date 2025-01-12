@@ -4,21 +4,11 @@ import connectToDb from '@/lib/db.js';
 import { Photo } from '@/models/Photo';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import anthropic from '@anthropic-ai/sdk';
-import { EventInput } from '@fullcalendar/core'
-
-
-
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const files = formData.getAll('files');
-
-    if (!process.env.CLAUDE_API_KEY) {
-        throw new Error('Claude API key is not set');
-      }
-    
 
     if (!files || files.length === 0) {
       return NextResponse.json(
@@ -27,115 +17,34 @@ export async function POST(request: Request) {
       );
     }
 
-    // Connect to MongoDB first
+    // Connect to MongoDB
     await connectToDb();
 
     // Ensure uploads directory exists
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (err) {
-      console.error('Error creating uploads directory:', err);
-    }
+    await mkdir(uploadDir, { recursive: true });
 
     const uploadPromises = files.map(async (file: any) => {
-      try {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        
-        // Create a unique filename
-        const uniqueFilename = `${Date.now()}-${file.name}`;
-        const filePath = path.join(uploadDir, uniqueFilename);
-        
-        // Save file
-        await writeFile(filePath, buffer);
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      
+      const uniqueFilename = `${Date.now()}-${file.name}`;
+      const filePath = path.join(uploadDir, uniqueFilename);
+      
+      await writeFile(filePath, buffer);
 
-        const imageBase64 = buffer.toString('base64');
-
-        const client = new anthropic({
-            apiKey: process.env.CLAUDE_API_KEY
-          });
-
-          const firstResponse = await client.messages.create({
-            model: "claude-3-5-sonnet-latest",
-            max_tokens: 1024,
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: "Write out what this says:" },
-                  {
-                    type: "image",
-                    source: {
-                      type: "base64",
-                      media_type: "image/png",
-                      data: imageBase64
-                    }
-                  }
-                ]
-              }
-            ]
-          });
-
-          const extractedText = (firstResponse.content[0] as anthropic.TextBlock).text;
-
-          const topicsResponse = await client.messages.create({
-            model: "claude-3-5-sonnet-latest",
-            max_tokens: 1024,
-            messages: [
-              {
-                role: "assistant",
-                content: "You are a task scheduler. Extract tasks from the text and format them as a numbered list of 3-6 word tasks to complete."
-              },
-              {
-                role: "user",
-                content: `Here are the notes: ${extractedText}. Create a numbered list of specific succinct tasks that need to be completed. Format as: 1. [Task]. There should be no more than 4 tasks, each task should be 2-6 words.`
-              }
-            ]
-          });
-
-          const topics = (topicsResponse.content[0]as anthropic.TextBlock).text;
-          const lines = topics.split('\n').filter(line => line.trim());
-          const tasks = lines.map((line: any) => line.replace(/^\d+\.\s*/, '').trim());
-
-          const eventsResponse = await client.messages.create({
-            model: "claude-3-5-sonnet-latest",
-            max_tokens: 1024,
-            messages: [
-              {
-                role: "assistant",
-                content: "You are an EventInput generator. Create an EventInput array from the tasks."
-              },
-              {
-                role: "user",
-                content: `Here are the tasks: ${tasks}. STRICTLY create an EventInput array from the tasks. Format as: {id: [id], title: [title], start: [start], end: [end], allDay: [allDay]}. Use the \
-                deadline to determine the end date. For example, if the deadline is today and at 11 am, set the end date to new Date().toISOString().replace(/T.*$/, '') + 'T11:00:00'. If the deadline is tomorrow, set the end date to tomorrow. If the deadline is in the future, set the end date to the deadline.`
-              }
-            ]
-          });
-
-
-          console.log(extractedText);
-          console.log(eventsResponse);
-          
-        // Create MongoDB document
-        const photo = await Photo.create({
-          name: file.name,
-          url: `/uploads/${uniqueFilename}`,
-          extractedText,
-          topics
-        });
-        
-        return photo;
-      } catch (err) {
-        console.error('Error processing file:', err);
-        throw err;
-      }
+      const photo = await Photo.create({
+        name: file.name,
+        url: `/uploads/${uniqueFilename}`,
+      });
+      
+      return photo;
     });
 
     const savedPhotos = await Promise.all(uploadPromises);
     
     return NextResponse.json({ 
+      success: true,
       message: 'Files uploaded successfully',
       photos: savedPhotos 
     });
@@ -143,7 +52,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(
-      { error: 'Error uploading files', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Error uploading files' },
       { status: 500 }
     );
   }

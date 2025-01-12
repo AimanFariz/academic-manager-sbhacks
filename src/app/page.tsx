@@ -13,10 +13,10 @@ import Dashboard from '@/components/Dashboard';
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+    <div className="grid grid-rows-[auto_1fr_auto] min-h-screen p-4 gap-8 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-6 items-center w-full">
         <Image
-          className="m-auto"
+          className="mb-4"
           src="/logo-transparent-png-removebg-preview.png"
           alt="Next.js logo"
           width={180}
@@ -24,9 +24,9 @@ export default function Home() {
           priority
         />
         <Dashboard/>
-        <FileUpload/>
-        <PhotoAnalysis />
-        <FetchCalendarButton/>
+        <div className="flex justify-center w-full">
+          <FetchCalendarButton/>
+        </div>
       </main>
     </div>
   );
