@@ -5,6 +5,7 @@ import FetchPhotosButton from "@/components/FetchPhotosButton";
 import FileUpload from "@/components/FileUpload";
 import Image from "next/image";
 import PhotoAnalysis from '@/components/PhotoAnalysis';
+import Calendar from '@/components/Calendar'
 
 export default function Home() {
   return (
@@ -21,7 +22,6 @@ export default function Home() {
         <FileUpload/>
         <PhotoAnalysis />
       </main>
-      
     </div>
   );
 
