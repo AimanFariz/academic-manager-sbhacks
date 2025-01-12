@@ -5,6 +5,10 @@ import { Photo } from '@/models/Photo';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import anthropic from '@anthropic-ai/sdk';
+import { EventInput } from '@fullcalendar/core'
+
+
+
 
 export async function POST(request: Request) {
   try {
@@ -53,7 +57,7 @@ export async function POST(request: Request) {
           });
 
           const firstResponse = await client.messages.create({
-            model: "claude-3-sonnet-20240229",
+            model: "claude-3-5-sonnet-latest",
             max_tokens: 1024,
             messages: [
               {
@@ -64,7 +68,7 @@ export async function POST(request: Request) {
                     type: "image",
                     source: {
                       type: "base64",
-                      media_type: "image/jpeg",
+                      media_type: "image/png",
                       data: imageBase64
                     }
                   }
@@ -76,23 +80,43 @@ export async function POST(request: Request) {
           const extractedText = (firstResponse.content[0] as anthropic.TextBlock).text;
 
           const topicsResponse = await client.messages.create({
-            model: "claude-3-sonnet-20240229",
+            model: "claude-3-5-sonnet-latest",
             max_tokens: 1024,
             messages: [
               {
                 role: "assistant",
-                content: "You are a note summarizer tasked with detecting the core topics required to complete the assignment."
+                content: "You are a task scheduler. Extract tasks from the text and format them as a numbered list of 3-6 word tasks to complete."
               },
               {
                 role: "user",
-                content: `Here are the notes: ${extractedText}. Strictly create a numbered list of topics for tasks to complete to upload into a calendar to complete the assignment.`
+                content: `Here are the notes: ${extractedText}. Create a numbered list of specific succinct tasks that need to be completed. Format as: 1. [Task]. There should be no more than 4 tasks, each task should be 2-6 words.`
               }
             ]
           });
 
           const topics = (topicsResponse.content[0]as anthropic.TextBlock).text;
+          const lines = topics.split('\n').filter(line => line.trim());
+          const tasks = lines.map((line: any) => line.replace(/^\d+\.\s*/, '').trim());
+
+          const eventsResponse = await client.messages.create({
+            model: "claude-3-5-sonnet-latest",
+            max_tokens: 1024,
+            messages: [
+              {
+                role: "assistant",
+                content: "You are an EventInput generator. Create an EventInput array from the tasks."
+              },
+              {
+                role: "user",
+                content: `Here are the tasks: ${tasks}. STRICTLY create an EventInput array from the tasks. Format as: {id: [id], title: [title], start: [start], end: [end], allDay: [allDay]}. Use the \
+                deadline to determine the end date. For example, if the deadline is today and at 11 am, set the end date to new Date().toISOString().replace(/T.*$/, '') + 'T11:00:00'. If the deadline is tomorrow, set the end date to tomorrow. If the deadline is in the future, set the end date to the deadline.`
+              }
+            ]
+          });
+
+
           console.log(extractedText);
-          console.log(topics);
+          console.log(eventsResponse);
           
         // Create MongoDB document
         const photo = await Photo.create({

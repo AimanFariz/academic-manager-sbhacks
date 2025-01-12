@@ -27,9 +27,9 @@ export default function Home() {
           priority
         />
         <Dashboard/>
-        {/* <FileUpload/>
-        <PhotoAnalysis />
-        <FetchCalendarButton/> */}
+        
+        
+        <FetchCalendarButton/> 
         
       </main>
     </div>
