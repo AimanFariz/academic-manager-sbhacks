@@ -1,122 +1,123 @@
-import React from 'react'
-import { EventApi, DateSelectArg, EventClickArg, EventContentArg, formatDate} from '@fullcalendar/core'
+import React, { useEffect, useState } from 'react'
+import { EventApi, DateSelectArg, EventClickArg, EventContentArg } from '@fullcalendar/core'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { INITIAL_EVENTS, createEventId } from './event-utils'
 
-interface Calendar {
-  weekendsVisible: boolean
-  currentEvents: EventApi[]
+interface Event {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  allDay: boolean;
+  backgroundColor?: string;
+  borderColor?: string;
 }
 
-export default class DemoApp extends React.Component<{}, Calendar> {
+// Define a color palette
+const EVENT_COLORS = [
+  '#FF6B6B', // Red
+  '#4ECDC4', // Teal
+  '#45B7D1', // Blue
+  '#96CEB4', // Sage
+  '#FFEEAD', // Yellow
+  '#D4A5A5', // Mauve
+  '#9B59B6', // Purple
+  '#3498DB', // Blue
+  '#E67E22', // Orange
+  '#2ECC71', // Green
+];
 
-  state: Calendar = {
-    weekendsVisible: true,
-    currentEvents: []
-  }
+export default function Calendar() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  render() {
-    return (
-      <div className='demo-app'>
-        <div className='demo-app-main'>
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }}
-            initialView='dayGridMonth'
-            editable={true}
-            selectable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
-            weekends={this.state.weekendsVisible}
-            initialEvents={INITIAL_EVENTS} // alternatively, use the `events` setting to fetch from a feed
-            select={this.handleDateSelect}
-            eventContent={renderEventContent} // custom render function
-            eventClick={this.handleEventClick}
-            eventsSet={this.handleEvents} // called after events are initialized/added/changed/removed
-            /* you can update a remote database when these fire:
-            eventAdd={function(){}}
-            eventChange={function(){}}
-            eventRemove={function(){}}
-            */
-          />
-        </div>
-      </div>
-    )
-  }
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const response = await fetch('/api/upload');
+        const data = await response.json();
+        
+        if (data.success && data.photos) {
+          const photoEvents = data.photos
+            .filter((photo: any) => photo.deadline && photo.topics)
+            .flatMap((photo: any, photoIndex: number) => {
+              const tasks = photo.topics.split('\n').filter(Boolean);
+              const deadline = new Date(photo.deadline);
+              const now = new Date();
+              
+              const totalTasks = tasks.length;
+              const totalTimeMs = deadline.getTime() - now.getTime();
+              const timePerTask = totalTimeMs / (totalTasks + 1);
+              
+              return tasks.map((task: string, index: number) => {
+                const taskStart = new Date(now.getTime() + (timePerTask * index));
+                const taskEnd = new Date(taskStart.getTime() + (timePerTask * 0.8));
+                
+                // Get a color from the palette, cycling through if we run out
+                const colorIndex = (photoIndex + index) % EVENT_COLORS.length;
+                const backgroundColor = EVENT_COLORS[colorIndex];
+                
+                return {
+                  id: `${photo._id}-${index}`,
+                  title: task.replace(/^\d+\.\s*/, '').trim(),
+                  start: taskStart.toISOString(),
+                  end: taskEnd.toISOString(),
+                  allDay: false,
+                  backgroundColor,
+                  borderColor: backgroundColor,
+                };
+              });
+            });
 
-  // renderSidebar() {
-  //   return (
-  //     <div className='demo-app-sidebar'>
-  //       <div className='demo-app-sidebar-section'>
-  //         <h2>Instructions</h2>
-  //         <ul>
-  //           <li>Select dates and you will be prompted to create a new event</li>
-  //           <li>Drag, drop, and resize events</li>
-  //           <li>Click an event to delete it</li>
-  //         </ul>
-  //       </div>
-  //       <div className='demo-app-sidebar-section'>
-  //         <label>
-  //           <input
-  //             type='checkbox'
-  //             checked={this.state.weekendsVisible}
-  //             onChange={this.handleWeekendsToggle}
-  //           ></input>
-  //           toggle weekends
-  //         </label>
-  //       </div>
-  //       <div className='demo-app-sidebar-section'>
-  //         <h2>All Events ({this.state.currentEvents.length})</h2>
-  //         <ul>
-  //           {this.state.currentEvents.map(renderSidebarEvent)}
-  //         </ul>
-  //       </div>
-  //     </div>
-  //   )
-  // }
-
-  handleWeekendsToggle = () => {
-    this.setState({
-      weekendsVisible: !this.state.weekendsVisible
-    })
-  }
-
-  handleDateSelect = (selectInfo: DateSelectArg) => {
-    let title = prompt('Please enter a new title for your event')
-    let calendarApi = selectInfo.view.calendar
-
-    calendarApi.unselect() // clear date selection
-
-    if (title) {
-      calendarApi.addEvent({
-        id: createEventId(),
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-        allDay: selectInfo.allDay
-      })
+          setEvents(photoEvents);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  handleEventClick = (clickInfo: EventClickArg) => {
+    fetchEvents();
+  }, []);
+
+  const handleEventClick = (clickInfo: EventClickArg) => {
     if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
-      clickInfo.event.remove()
+      clickInfo.event.remove();
     }
+  };
+
+  if (loading) {
+    return <div>Loading calendar...</div>;
   }
 
-  handleEvents = (events: EventApi[]) => {
-    this.setState({
-      currentEvents: events
-    })
-  }
-
+  return (
+    <div className='demo-app'>
+      <div className='demo-app-main'>
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          }}
+          initialView='dayGridMonth'
+          editable={true}
+          selectable={true}
+          selectMirror={true}
+          dayMaxEvents={true}
+          events={events}
+          eventClick={handleEventClick}
+          eventContent={renderEventContent}
+          slotMinTime="09:00:00"
+          slotMaxTime="21:00:00"
+          slotDuration="01:00:00"
+        />
+      </div>
+    </div>
+  );
 }
 
 function renderEventContent(eventContent: EventContentArg) {
@@ -125,14 +126,5 @@ function renderEventContent(eventContent: EventContentArg) {
       <b>{eventContent.timeText}</b>
       <i>{eventContent.event.title}</i>
     </>
-  )
-}
-
-function renderSidebarEvent(event: EventApi) {
-  return (
-    <li key={event.id}>
-      <b>{formatDate(event.start!, {year: 'numeric', month: 'short', day: 'numeric'})}</b>
-      <i>{event.title}</i>
-    </li>
-  )
+  );
 }

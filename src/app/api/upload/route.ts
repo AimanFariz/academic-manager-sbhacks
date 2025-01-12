@@ -98,33 +98,35 @@ export async function POST(request: Request) {
           const lines = topics.split('\n').filter(line => line.trim());
           const tasks = lines.map((line: any) => line.replace(/^\d+\.\s*/, '').trim());
 
+          // Create MongoDB document
+        const photo = await Photo.create({
+            name: file.name,
+            url: `/uploads/${uniqueFilename}`,
+            extractedText,
+            topics,
+            deadline: null // This will be updated later via the deadline API endpoint
+          });
+
           const eventsResponse = await client.messages.create({
             model: "claude-3-5-sonnet-latest",
             max_tokens: 1024,
             messages: [
               {
                 role: "assistant",
-                content: "You are an EventInput generator. Create an EventInput array from the tasks."
+                content: "You are an EventInput generator. Create an EventInput array from the tasks and deadline."
               },
               {
                 role: "user",
-                content: `Here are the tasks: ${tasks}. STRICTLY create an EventInput array from the tasks. Format as: {id: [id], title: [title], start: [start], end: [end], allDay: [allDay]}. Use the \
-                deadline to determine the end date. For example, if the deadline is today and at 11 am, set the end date to new Date().toISOString().replace(/T.*$/, '') + 'T11:00:00'. If the deadline is tomorrow, set the end date to tomorrow. If the deadline is in the future, set the end date to the deadline.`
+                content: "Here are the tasks: ${tasks}. The deadline for these tasks is: ${photo.deadline}. STRICTLY create an EventInput array from the tasks. Format as: {id: [id], title: [title], start: [start], end: [end], allDay: [allDay]}."
               }
             ]
           });
 
+          const eventData = JSON.parse((eventsResponse.content[0] as anthropic.TextBlock).text);
+          console.log('Generated events with deadline consideration:', eventData);
 
           console.log(extractedText);
           console.log(eventsResponse);
-          
-        // Create MongoDB document
-        const photo = await Photo.create({
-          name: file.name,
-          url: `/uploads/${uniqueFilename}`,
-          extractedText,
-          topics
-        });
         
         return photo;
       } catch (err) {
@@ -150,23 +152,43 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-    try {
-      await connectToDb();
+  try {
+    await connectToDb();
+    
+    const photos = await Photo.find({})
+      .sort({ createdAt: -1 })
+      .select('name url createdAt extractedText topics deadline');
+    
+    // Transform photos into a format that includes events
+    const photosWithEvents = photos.map(photo => {
+      let events = [];
+      if (photo.topics && photo.deadline) {
+        const tasks = photo.topics.split('\n').filter(Boolean);
+        events = tasks.map((task, index) => ({
+          id: `${photo._id}-${index}`,
+          title: task.replace(/^\d+\.\s*/, '').trim(),
+          start: new Date().toISOString(),
+          end: photo.deadline,
+          allDay: false
+        }));
+      }
       
-      const photos = await Photo.find({})
-        .sort({ createdAt: -1 })
-        .select('name url createdAt extractedText topics');
-      
-      return NextResponse.json({ 
-        photos,
-        success: true 
-      });
-    } catch (error) {
-      return NextResponse.json(
-        { error: 'Error fetching photos' },
-        { status: 500 }
-      );
-    }
+      return {
+        ...photo.toObject(),
+        events
+      };
+    });
+
+    return NextResponse.json({ 
+      photos: photosWithEvents,
+      success: true 
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Error fetching photos' },
+      { status: 500 }
+    );
+  }
 }
 
 export const config = {

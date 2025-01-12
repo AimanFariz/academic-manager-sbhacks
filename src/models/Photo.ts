@@ -23,6 +23,10 @@ const photoSchema = new mongoose.Schema({
     topics: {
       type: String,
       trim: true
+    },
+    deadline: {
+      type: Date,
+      required: false
     }
   }, {
     timestamps: true

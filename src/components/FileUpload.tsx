@@ -82,30 +82,52 @@ export default function FileUpload() {
     setIsPopupOpen(true);
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (selectedPhoto) {
-      // Get the file extension from the original name
-      const fileExtension = selectedPhoto.name.split('.').pop();
-      
-      // Create new name with same extension
-      const updatedName = `${newFileName}.${fileExtension}`;
-      
-      // Update the photo in the photos array with both name and deadline
-      setPhotos(photos.map(photo => 
-        photo._id === selectedPhoto._id 
-          ? { 
-              ...photo, 
-              name: updatedName,
-              deadline: selectedDateTime
-            }
-          : photo
-      ));
+      try {
+        // Get the file extension from the original name
+        const fileExtension = selectedPhoto.name.split('.').pop();
+        
+        // Create new name with same extension
+        const updatedName = `${newFileName}.${fileExtension}`;
+        
+        // Send update to MongoDB
+        const response = await fetch(`/api/photos/${selectedPhoto._id}/deadline`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            name: updatedName,
+            deadline: selectedDateTime 
+          }),
+        });
 
-      // Reset states
-      setIsPopupOpen(false);
-      setSelectedPhoto(null);
-      setNewFileName('');
-      setSelectedDateTime('');
+        if (!response.ok) {
+          throw new Error('Failed to update photo');
+        }
+
+        // Update local state
+        setPhotos(photos.map(photo => 
+          photo._id === selectedPhoto._id 
+            ? { 
+                ...photo, 
+                name: updatedName,
+                deadline: selectedDateTime
+              }
+            : photo
+        ));
+
+        // Reset states
+        setIsPopupOpen(false);
+        setSelectedPhoto(null);
+        setNewFileName('');
+        setSelectedDateTime('');
+        
+      } catch (error) {
+        console.error('Error updating photo:', error);
+        // Optionally show error to user
+      }
     }
   };
 
