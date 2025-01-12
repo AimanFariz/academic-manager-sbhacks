@@ -3,7 +3,7 @@ import React from 'react';
 const SignUp: React.FC = () => {
   return (
     <div className="flex items-center justify-center min-h-screen ">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+      <div className="w-full max-w-md p-8 space-y-6 bg-slate-200 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-center text-gray-800">Sign Up</h2>
         <form className="space-y-4">
           {/* Name Input */}
@@ -59,7 +59,7 @@ const SignUp: React.FC = () => {
         <div className="flex items-center justify-center mt-4">
           <button
             type="button"
-            className="flex items-center px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring focus:ring-blue-500"
+            className="flex items-center px-4 py-2 text-gray-700 bg-white rounded-lg hover:bg-gray-300 focus:outline-none focus:ring focus:ring-blue-500"
           >
             <img
               src="http://pluspng.com/img-png/google-logo-png-open-2000.png"
