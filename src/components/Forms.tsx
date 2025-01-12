@@ -2,15 +2,7 @@ import React,{useEffect, useState} from 'react'
 import Image from 'next/image'
 
 function Forms() {
-    const [playerList, setPlayerList] = useState([])
-    useEffect(()=>{
-      let array = localStorage.getItem("playerList")
-    
-      if(array){
-        setPlayerList(JSON.parse(array))
-      }
-    },[])
-  
+
     return (
     <div className='flex py-10 items-center justify-center h-screen'>
         <div className='flex flex-col flex-grow bg-green-800 px-10 py-10'>
