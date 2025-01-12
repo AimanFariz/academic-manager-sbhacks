@@ -10,12 +10,13 @@ import PhotoAnalysis from '@/components/PhotoAnalysis';
 import {useRouter} from 'next/navigation';
 import Calendar from '@/components/Calendar'
 import Dashboard from '@/components/Dashboard';
+import SignUp from '@/components/SignUp';
+import LightDarkModeToggle from '@/components/DarkMode';
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        
+    <div className="justify-items-center sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col row-start-2 gap-5 justify-start items-start sm:items-start">
         <Image
           className="m-auto"
           src="/logo-transparent-png-removebg-preview.png"
@@ -24,7 +25,9 @@ export default function Home() {
           height={38}
           priority
         />
-        <Dashboard/>
+        {/* <Dashboard/> */}
+        {/* <LightDarkModeToggle/> */}
+        <SignUp/>
         {/* <FileUpload/>
         <PhotoAnalysis />
         <FetchCalendarButton/> */}

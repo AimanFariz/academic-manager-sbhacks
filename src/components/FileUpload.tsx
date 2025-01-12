@@ -9,6 +9,7 @@ interface Photo {
   _id: string;
   name: string;
   url: string;
+  deadline: Date;
   createdAt: string;
 }
 
@@ -107,6 +108,7 @@ export default function FileUpload() {
                   className="w-full h-48 object-cover"
                 />
                 <p className="mt-2 text-sm">{photo.name}</p>
+                {/* <p className="mt-2 text-sm">{photo.deadline}</p> */}
               </div>
             ))}
           </div>
