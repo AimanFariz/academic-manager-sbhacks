@@ -1,14 +1,20 @@
 // app/api/upload/route.ts
 import { NextResponse } from 'next/server';
-import connectToDb from '@/lib/db';
+import connectToDb from '@/lib/db.js';
 import { Photo } from '@/models/Photo';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const files = formData.getAll('files');
+
+    if (!process.env.CLAUDE_API_KEY) {
+        throw new Error('Claude API key is not set');
+      }
+    
 
     if (!files || files.length === 0) {
       return NextResponse.json(
@@ -39,11 +45,61 @@ export async function POST(request: Request) {
         
         // Save file
         await writeFile(filePath, buffer);
-        
+
+        const imageBase64 = buffer.toString('base64');
+
+        const client = new anthropic({
+            apiKey: process.env.CLAUDE_API_KEY
+          });
+
+          const firstResponse = await client.messages.create({
+            model: "claude-3-sonnet-20240229",
+            max_tokens: 1024,
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: "Write out what this says:" },
+                  {
+                    type: "image",
+                    source: {
+                      type: "base64",
+                      media_type: "image/png",
+                      data: imageBase64
+                    }
+                  }
+                ]
+              }
+            ]
+          });
+
+          const extractedText = (firstResponse.content[0] as anthropic.TextBlock).text;
+
+          const topicsResponse = await client.messages.create({
+            model: "claude-3-sonnet-20240229",
+            max_tokens: 1024,
+            messages: [
+              {
+                role: "assistant",
+                content: "You are a note summarizer tasked with detecting the core topics required to complete the assignment."
+              },
+              {
+                role: "user",
+                content: `Here are the notes: ${extractedText}. Strictly create a numbered list of topics for tasks to complete to upload into a calendar to complete the assignment.`
+              }
+            ]
+          });
+
+          const topics = (topicsResponse.content[0]as anthropic.TextBlock).text;
+          console.log(extractedText);
+          console.log(topics);
+          
         // Create MongoDB document
         const photo = await Photo.create({
           name: file.name,
-          url: `/uploads/${uniqueFilename}`
+          url: `/uploads/${uniqueFilename}`,
+          extractedText,
+          topics
         });
         
         return photo;
@@ -74,8 +130,8 @@ export async function GET() {
       await connectToDb();
       
       const photos = await Photo.find({})
-        .sort({ createdAt: -1 }) // Sort by newest first
-        .select('name url createdAt'); // Select specific fields
+        .sort({ createdAt: -1 })
+        .select('name url createdAt extractedText topics');
       
       return NextResponse.json({ 
         photos,
@@ -87,7 +143,7 @@ export async function GET() {
         { status: 500 }
       );
     }
-  }
+}
 
 export const config = {
   api: {

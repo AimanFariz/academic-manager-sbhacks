@@ -1,12 +1,14 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Photo {
-  _id: string;
-  name: string;
-  url: string;
-  createdAt: string;
-}
+    _id: string;
+    name: string;
+    url: string;
+    extractedText: string;
+    topics: string;
+    createdAt: string;
+  }
 
 export default function FetchPhotosButton() {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -48,6 +50,16 @@ export default function FetchPhotosButton() {
                   alt={photo.name}
                   className="w-full h-48 object-cover"
                 />
+                <p className="mt-2 text-sm text-gray-700">
+                     <strong>Extracted Text:</strong><br/>
+                     {photo.extractedText}
+                </p>
+                {photo.topics && (
+                    <p className="mt-2 text-sm text-gray-700">
+                    <strong>Topics:</strong><br/>
+                    {photo.topics}
+                    </p>
+                )}
                 <p className="mt-2 text-sm">{photo.name}</p>
                 <p className="text-xs text-gray-500">
                   {new Date(photo.createdAt).toLocaleDateString()}
