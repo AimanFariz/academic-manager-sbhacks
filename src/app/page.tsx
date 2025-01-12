@@ -1,3 +1,4 @@
+import FetchPhotosButton from "@/components/FetchPhotosButton";
 import FileUpload from "@/components/FileUpload";
 import Image from "next/image";
 
@@ -14,6 +15,7 @@ export default function Home() {
           priority
         />
         <FileUpload/>
+        <FetchPhotosButton />
       </main>
       
     </div>
