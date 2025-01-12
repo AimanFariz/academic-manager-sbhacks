@@ -142,10 +142,77 @@ b { /* used for event dates/times */
 .demo-app-main {
   flex-grow: 1;
   padding: 3em;
+} 
+
+
+
+/* .fc { the calendar root */
+  /* max-width: 1100px; */
+  /* max-height: 500px; */
+  /* margin: 0 auto; */
+/* } */
+
+/* Calendar container size */
+.demo-app-main {
+  max-width: 800px;
+  max-height: 500px;
+  margin: 0 auto;
 }
 
 .fc { /* the calendar root */
   max-width: 800px;
   max-height: 500px;
-  margin: 0 auto;
+}
+
+/* Adjust calendar event heights and spacing */
+.fc .fc-daygrid-day-frame {
+  min-height: 70px !important; /* Reduced from 100px */
+}
+
+.fc .fc-daygrid-event {
+  padding: 0px 2px !important; /* Reduced padding */
+  font-size: 11px !important; /* Smaller font */
+}
+
+.fc .fc-timegrid-event {
+  padding: 0px !important;
+  font-size: 11px !important;
+}
+
+
+/* Adjust all-day section height */
+.fc .fc-daygrid-day-events {
+  min-height: auto !important;
+  margin-bottom: 0 !important;
+}
+
+.fc .fc-daygrid-body-natural {
+  height: auto !important;
+}
+
+/* Make event titles and time more compact */
+.fc-event-title {
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+}
+
+.fc-event-time {
+  font-size: 10px !important;
+  padding: 0 !important;
+}
+
+/* Adjust header text sizes */
+.fc-toolbar-title {
+  font-size: 1.2em !important; /* Reduced from default */
+}
+
+.fc-button {
+  padding: 0.2em 0.4em !important; /* Smaller buttons */
+  font-size: 0.9em !important;
+}
+
+/* Adjust day number size */
+.fc-daygrid-day-number {
+  font-size: 0.9em !important;
+  padding: 2px 4px !important;
 }
