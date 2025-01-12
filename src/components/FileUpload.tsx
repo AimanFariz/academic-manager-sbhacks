@@ -1,104 +1,115 @@
-'use client';
+// components/FileUpload.tsx
+'use client'
+import { useCallback, useState, useEffect } from 'react';
+import { useDropzone } from 'react-dropzone';
 
-import { useState } from 'react';
-
-interface UploadResponse {
-    message: string;
-    files: {
-        filename: string;
-        size: number;
-        mimetype: string;
-    }[];
-}
-
-interface ErrorResponse {
-    error: string;
+interface Photo {
+  _id: string;
+  name: string;
+  url: string;
+  createdAt: string;
 }
 
 export default function FileUpload() {
-    const [files, setFiles] = useState<File[]>([]);
-    const [status, setStatus] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loading, setLoading] = useState(false);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setFiles(Array.from(e.target.files));
-        }
-    };
+  const fetchPhotos = async () => {
+    try {
+      const response = await fetch('/api/upload');
+      const data = await response.json();
+      if (data.success) {
+        setPhotos(data.photos);
+      }
+    } catch (error) {
+      console.error('Error fetching photos:', error);
+    }
+  };
 
-    const formatSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
+  useEffect(() => {
+    fetchPhotos();
+  }, []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        
-        if (files.length === 0) {
-            setStatus('Please select files to upload');
-            return;
-        }
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    setSelectedFiles(prev => [...prev, ...acceptedFiles]);
+  }, []);
 
-        const formData = new FormData();
-        files.forEach(file => {
-            formData.append('files', file);
-        });
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
+    }
+  });
 
-        try {
-            setStatus('Uploading...');
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return;
+    setLoading(true);
 
-            const result = (await response.json()) as UploadResponse | ErrorResponse;
-            
-            if (!response.ok) {
-                throw new Error('error' in result ? result.error : 'Upload failed');
-            }
+    const formData = new FormData();
+    selectedFiles.forEach((file) => {
+      formData.append('files', file);
+    });
 
-            setStatus('Upload successful!');
-            setFiles([]);
-        } catch (error) {
-            setStatus(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-    };
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (response.ok) {
+        setSelectedFiles([]);
+        await fetchPhotos(); // Refresh the photos list
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="p-4">
-            <h2 className="text-2xl font-bold mb-4">File Upload</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                    <input
-                        type="file"
-                        multiple
-                        onChange={handleFileChange}
-                        className="w-full"
-                    />
-                </div>
-
-                {files.length > 0 && (
-                    <div className="mt-4">
-                        <h3 className="font-semibold">Selected Files:</h3>
-                        <ul className="list-disc pl-5">
-                            {files.map((file, index) => (
-                                <li key={index}>
-                                    {file.name} ({formatSize(file.size)})
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-
-                {status && (
-                    <div className="mt-4 p-3 bg-gray-100 rounded">
-                        {status}
-                    </div>
-                )}
-            </form>
+  return (
+    <div className="max-w-4xl mx-auto p-4">
+      <div {...getRootProps()} className="border-2 border-dashed p-4 rounded-lg">
+        <input {...getInputProps()} />
+        <p>Drag & drop files here, or click to select files</p>
+      </div>
+      
+      {selectedFiles.length > 0 && (
+        <div className="mt-4">
+          <h3 className="font-semibold">Selected Files:</h3>
+          <ul className="mt-2">
+            {selectedFiles.map((file, index) => (
+              <li key={index}>{file.name}</li>
+            ))}
+          </ul>
+          <button
+            onClick={handleUpload}
+            disabled={loading}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            {loading ? 'Uploading...' : 'Upload Files'}
+          </button>
         </div>
-    );
-}
+      )}
 
+      {photos.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">Uploaded Photos</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {photos.map((photo) => (
+              <div key={photo._id} className="border rounded p-2">
+                <img 
+                  src={photo.url} 
+                  alt={photo.name}
+                  className="w-full h-48 object-cover"
+                />
+                <p className="mt-2 text-sm">{photo.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
