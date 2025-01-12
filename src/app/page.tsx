@@ -25,8 +25,8 @@ export default function Home() {
 
 return (
   <div className="flex justify-center max-h-screen bg-gradient-to-r from-slate-900 via-gray-800 to-slate-900 font-[family-name:var(--font-geist-sans)]">
-    {/* <NavBar/>
-    <SignUp/> */}
+    <NavBar/>
+    <SignUp/>
     <Forms/>
   </div>
 );
