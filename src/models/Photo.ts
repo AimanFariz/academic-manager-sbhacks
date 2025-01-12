@@ -1,14 +1,31 @@
 import mongoose from "mongoose";
 
-const PhotoSchema = new mongoose.Schema({
-  name: String,
-  url: String,
-  extractedText: String,
-  topics: String,
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
-});
+const photoSchema = new mongoose.Schema({
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    url: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      index: true
+    },
+    extractedText: {
+      type: String,
+      trim: true
+    },
+    topics: {
+      type: String,
+      trim: true
+    }
+  }, {
+    timestamps: true
+  });
 
-export const Photo = mongoose.models.Photo || mongoose.model('Photo', PhotoSchema);
+export const Photo = mongoose.models.Photo || mongoose.model("Photo", photoSchema);
