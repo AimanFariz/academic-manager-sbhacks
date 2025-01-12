@@ -1,33 +1,28 @@
-'use client';
+'use client'
+import DemoApp from "@/components/Calendar";
+import CalendarComponent from "@/components/EventCalendar";
+import FetchPhotosButton from "@/components/FetchPhotosButton";
 import FileUpload from "@/components/FileUpload";
-import Forms from "@/components/Forms";
-import NavBar from "@/components/NavBar";
-import SignUp from "@/components/SignUp";
 import Image from "next/image";
-import React, {useEffect} from "react";
-import ReactDOM from "react-dom/client";
-import Calendar from "../components/Calendar";
-import "./globals.css";
-
+import PhotoAnalysis from '@/components/PhotoAnalysis';
 
 export default function Home() {
-  useEffect(() => {
-    const rootElement = document.createElement("div");
-    document.body.appendChild(rootElement);
-    const root = ReactDOM.createRoot(rootElement);
+  return (
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+        <Image
+          className="dark:invert"
+          src="/next.svg"
+          alt="Next.js logo"
+          width={180}
+          height={38}
+          priority
+        />
+        <FileUpload/>
+        <PhotoAnalysis />
+      </main>
+      
+    </div>
+  );
 
-    root.render(
-      <React.StrictMode>
-        <Calendar />
-      </React.StrictMode>
-    );
-  }, []);
-
-return (
-  <div className="flex justify-center max-h-screen bg-gradient-to-r from-slate-900 via-gray-800 to-slate-900 font-[family-name:var(--font-geist-sans)]">
-    <NavBar/>
-    <SignUp/>
-    <Forms/>
-  </div>
-);
 }
