@@ -12,6 +12,7 @@ import {useRouter} from 'next/navigation';
 
 
 import Calendar from '@/components/Calendar'
+import Dashboard from '@/components/Dashboard';
 
 export default function Home() {
   return (
@@ -25,9 +26,10 @@ export default function Home() {
           height={38}
           priority
         />
-        <FileUpload/>
+        <Dashboard/>
+        {/* <FileUpload/>
         <PhotoAnalysis />
-        <FetchCalendarButton/>
+        <FetchCalendarButton/> */}
         
       </main>
     </div>
