@@ -1,6 +1,79 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@tailwind components;
+
+@layer components {
+  .all-\[unset\] {
+    all: unset;
+  }
+}
+
+:root {
+  --brand-600: rgba(127, 86, 217, 1);
+  --brand-700: rgba(105, 65, 198, 1);
+  --display-md-medium-font-family: "Inter", Helvetica;
+  --display-md-medium-font-size: 36px;
+  --display-md-medium-font-style: normal;
+  --display-md-medium-font-weight: 500;
+  --display-md-medium-letter-spacing: -0.72px;
+  --display-md-medium-line-height: 44px;
+  --display-sm-semibold-font-family: "Inter", Helvetica;
+  --display-sm-semibold-font-size: 30px;
+  --display-sm-semibold-font-style: normal;
+  --display-sm-semibold-font-weight: 600;
+  --display-sm-semibold-letter-spacing: 0px;
+  --display-sm-semibold-line-height: 38px;
+  --gray-300: rgba(213, 215, 218, 1);
+  --gray-500: rgba(113, 118, 128, 1);
+  --gray-600: rgba(83, 88, 98, 1);
+  --gray-700: rgba(65, 70, 81, 1);
+  --gray-900: rgba(24, 29, 39, 1);
+  --shadow-xs: 0px 1px 2px 0px rgba(10, 13, 18, 0.05);
+  --text-lg-semibold-font-family: "Inter", Helvetica;
+  --text-lg-semibold-font-size: 18px;
+  --text-lg-semibold-font-style: normal;
+  --text-lg-semibold-font-weight: 600;
+  --text-lg-semibold-letter-spacing: 0px;
+  --text-lg-semibold-line-height: 28px;
+  --text-md-medium-font-family: "Inter", Helvetica;
+  --text-md-medium-font-size: 16px;
+  --text-md-medium-font-style: normal;
+  --text-md-medium-font-weight: 500;
+  --text-md-medium-letter-spacing: 0px;
+  --text-md-medium-line-height: 24px;
+  --text-md-regular-font-family: "Inter", Helvetica;
+  --text-md-regular-font-size: 16px;
+  --text-md-regular-font-style: normal;
+  --text-md-regular-font-weight: 400;
+  --text-md-regular-letter-spacing: 0px;
+  --text-md-regular-line-height: 24px;
+  --text-md-semibold-font-family: "Inter", Helvetica;
+  --text-md-semibold-font-size: 16px;
+  --text-md-semibold-font-style: normal;
+  --text-md-semibold-font-weight: 600;
+  --text-md-semibold-letter-spacing: 0px;
+  --text-md-semibold-line-height: 24px;
+  --text-sm-medium-font-family: "Inter", Helvetica;
+  --text-sm-medium-font-size: 14px;
+  --text-sm-medium-font-style: normal;
+  --text-sm-medium-font-weight: 500;
+  --text-sm-medium-letter-spacing: 0px;
+  --text-sm-medium-line-height: 20px;
+  --text-sm-regular-font-family: "Inter", Helvetica;
+  --text-sm-regular-font-size: 14px;
+  --text-sm-regular-font-style: normal;
+  --text-sm-regular-font-weight: 400;
+  --text-sm-regular-letter-spacing: 0px;
+  --text-sm-regular-line-height: 20px;
+  --text-sm-semibold-font-family: "Inter", Helvetica;
+  --text-sm-semibold-font-size: 14px;
+  --text-sm-semibold-font-style: normal;
+  --text-sm-semibold-font-weight: 600;
+  --text-sm-semibold-letter-spacing: 0px;
+  --text-sm-semibold-line-height: 20px;
+  --white: rgba(255, 255, 255, 1);
+}
 
 :root {
   --background: #ffffff;
@@ -18,4 +91,128 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+
+html,
+body,
+body > div { /* the react root */
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+ul {
+  margin: 0;
+  padding: 0 0 0 1.5em;
+}
+
+li {
+  margin: 1.5em 0;
+  padding: 0;
+}
+
+b { /* used for event dates/times */
+  margin-right: 3px;
+}
+
+.demo-app {
+  display: flex;
+  min-height: 100%;
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+.demo-app-sidebar {
+  width: 300px;
+  line-height: 1.5;
+  background: #eaf9ff;
+  border-right: 1px solid #d3e2e8;
+}
+
+.demo-app-sidebar-section {
+  padding: 2em;
+}
+
+.demo-app-main {
+  flex-grow: 1;
+  padding: 3em;
+} 
+
+
+
+/* .fc { the calendar root */
+  /* max-width: 1100px; */
+  /* max-height: 500px; */
+  /* margin: 0 auto; */
+/* } */
+
+/* Calendar container size */
+.demo-app-main {
+  max-width: 800px;
+  max-height: 500px;
+  margin: 0 auto;
+}
+
+.fc { /* the calendar root */
+  max-width: 800px;
+  max-height: 500px;
+}
+
+/* Adjust calendar event heights and spacing */
+.fc .fc-daygrid-day-frame {
+  min-height: 70px !important; /* Reduced from 100px */
+}
+
+.fc .fc-daygrid-event {
+  padding: 0px 2px !important; /* Reduced padding */
+  font-size: 11px !important; /* Smaller font */
+}
+
+.fc .fc-timegrid-event {
+  padding: 0px !important;
+  font-size: 11px !important;
+}
+
+
+/* Adjust all-day section height */
+.fc .fc-daygrid-day-events {
+  min-height: auto !important;
+  margin-bottom: 0 !important;
+}
+
+.fc .fc-daygrid-body-natural {
+  height: auto !important;
+}
+
+/* Make event titles and time more compact */
+.fc-event-title {
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+}
+
+.fc-event-time {
+  font-size: 10px !important;
+  padding: 0 !important;
+}
+
+/* Adjust header text sizes */
+.fc-toolbar-title {
+  font-size: 1.2em !important; /* Reduced from default */
+}
+
+.fc-button {
+  padding: 0.2em 0.4em !important; /* Smaller buttons */
+  font-size: 0.9em !important;
+}
+
+/* Adjust day number size */
+.fc-daygrid-day-number {
+  font-size: 0.9em !important;
+  padding: 2px 4px !important;
 }
